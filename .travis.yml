@@ -22,7 +22,7 @@ after_success:
 
     # Take images and pushes to docker hub
     - docker push rohitkalra/multi-client
-    - docker push rohitkalra/mult-nginx
+    - docker push rohitkalra/multi-nginx
     - docker push rohitkalra/multi-server
     - docker push rohitkalra/multi-worker
 
