@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment #type of the object
+metadata:
+    name: client-deployment # name of the deployment
+spec: # configure the deployment
+    replicas: 3 # number of pods required for the image
+    selector: # to get the handle of the pods created by master
+        matchLabels:
+            component: web
+    template:
+        metadata:
+            labels: # with the the help of selector and label deployment will manage the pods
+                component: web # label that will be assoicated to the pods
+        spec:
+            containers:
+                - name: client
+                  image: rohitkalra/multi-client:v5
+                  ports:
+                    - containerPort: 3000
+

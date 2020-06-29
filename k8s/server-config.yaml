@@ -1,0 +1,37 @@
+# Example to combine config files. Here server-deployment and server -cluster-ip-service are combined
+# To combine files segregate the sections with ---
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#     name: server-deployment
+# spec:
+#     replicas: 3
+#     selector:
+#         matchLabels:
+#             component: server
+#     template:
+#         metadata:
+#             labels:
+#                 component: server
+#         spec:
+#             containers:
+#                 - name: server
+#                   image: stephengrider/multi-server
+#                   ports:
+#                     - containerPort: 5000
+                    
+# ---
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#     name: server-cluster-ip-service
+# spec:
+#     type: ClusterIP
+#     selector: #used to identify which pods to provide access, in the client-deployment file it uses labels to get the name
+#     #the name of the component should be same with label name in client deployment file
+#         component: web
+#     ports:
+#         - port: 5000 # container port to access the pod
+#           targetPort: 5000 # cluster IP port to provide access to other objects

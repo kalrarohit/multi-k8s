@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: server-deployment
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            component: server
+    template:
+        metadata:
+            labels:
+                component: server
+        spec:
+            containers:
+                - name: server
+                  image: rohitkalra/multi-server
+                  ports:
+                    - containerPort: 5000
+                  env: # environemnt variables that should be passed into the container
+                    - name: REDIS_HOST
+                      value: redis-cluster-ip-service # value of name coming from redis-cluster-ip-service config file
+                    - name: REDIS_PORT
+                      value: '6379' # value coming from targetPort in redis-cluster-ip-service config file
+                    - name: PGUSER
+                      value: postgres
+                    - name: PGHOST
+                      value: postgres-cluster-ip-service
+                    - name: PGPORT
+                      value: '5432'
+                    - name: PGDATABASE
+                      value: postgres
+                    - name: PGPASSWORD # this is reference in the image hence this name
+                      valueFrom:
+                        secretKeyRef:
+                            name: pgpassword # name of the secret created in kubernetes cluster
+                            key: POSTGRES_PASSWORD # key name of the secret. A secret can hold multiple key value pairs

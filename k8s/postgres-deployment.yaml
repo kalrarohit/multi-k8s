@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: postgres-deployment
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            component: postgres
+    template:
+        metadata:
+            labels:
+                component: postgres
+        spec:
+            volumes: # volume to which this Pod will be attached defined in database-persistent-volume-claim config file
+                - name: postgres-storage
+                  persistentVolumeClaim:
+                    claimName: database-persistent-volume-claim
+            containers:
+                - name: postgres
+                  image: postgres
+                  ports:
+                    - containerPort: 5432
+                  volumeMounts:
+                    - name: postgres-storage  # Check in volumes the volume asked from Kubernetes
+                      mountPath: /var/lib/postgresql/data #the path where data has to be stored in container, eventually it will use persistent volume
+                      subPath: postgres # this is the folder in persistent volume claim where data will be stored - specific for postgres 
+                  env:
+                    - name: POSTGRES_PASSWORD # This is to override the default password of POSTGRES database
+                      valueFrom:
+                        secretKeyRef:
+                            name: pgpassword # name of the secret created in kubernetes cluster
+                            key: POSTGRES_PASSWORD # key name of the secret. A secret can hold multiple key value pairs
