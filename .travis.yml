@@ -1,6 +1,10 @@
 sudo: required
 services:
     - docker
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1    
 before_install:
     # Below command will decrypt the gke-service-account which has keys to deploy objects into GKE cloud and puts it into root project directory
     - openssl aes-256-cbc -K $encrypted_b3faf7fddd77_key -iv $encrypted_b3faf7fddd77_iv -in gke-service-account.json.enc -out gke-service-account.json -d
