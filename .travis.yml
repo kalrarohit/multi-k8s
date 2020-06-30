@@ -1,0 +1,26 @@
+sudo: required
+services:
+    - docker
+before_install:
+    # Below command will decrypt the gke-service-account which has keys to deploy objects into GKE cloud and puts it into root project directory
+    - openssl aes-256-cbc -K $encrypted_b3faf7fddd77_key -iv $encrypted_b3faf7fddd77_iv -in gke-service-account.json.enc -out gke-service-account.json -d
+    - curl https://sdk.cloud.google.com | bash > /dev/null; # install google cloud sdk
+    - source $HOME/google-cloud-sdk/path.bash.inc # apply configs to the installed sdk
+    - gcloud components update kubectl # enable kubectl
+    - gcloud auth activate-service-account --key-file gke-service-account.json #key file with access keys to GKE cluster
+    - gcloud config set project multi-k8s-281821 # set the project id for google sdk
+    - gcloud config set compute/zone us-central1-c # set the zone for google sdk
+    - gcloud container clusters get-credentials multi-cluster-k8s  # set the gke cluster for google sdk to manage
+    # Log in to the docker CLI
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - docker build -t rohitkalra/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+    - docker run  -e CI=true rohitkalra/react-test npm run test -- --coverage
+    # - docker run -e CI=true rohitkalra/docker-react npm run test
+
+deploy:
+    provider: script # this script will build the images, tag them, push to docker, apply configs
+    script: bash ./deploy.sh
+    on:
+        branch: master
